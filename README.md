@@ -5,8 +5,9 @@
 | _id             | Mongoose.ObjectId  | Yes      | Yes   |
 | name            | String  | Yes      | No     |
 | email           | String  | Yes      | Yes    |
+| password           | String  | Yes      | No    |
 | leetcodeUserName| String  | Yes      | Yes    |
-| leetcodeCookies | String  | Yes      | No     |
+| leetcodeCookies | String  | Yes      | Yes     |
 | solvedProblems  | [String]| Yes      | No     |
 
 Note: solvedProblems contains the title slug of the leetcode problem that the user has solved
@@ -51,8 +52,9 @@ POST /api/auth/register
 {
   "name": "John Doe",
   "email": "john.doe@example.com",
+  "password": "123",
   "leetcodeUserName": "john123",
-  "leetcodeCookies": "encrypted_leetcode_cookies"
+  "leetcodeCookies": "leetcode_session_cookies"
 }
 ```
 
@@ -83,8 +85,7 @@ POST /api/auth/login
 ```json
 {
   "email": "john.doe@example.com",
-  "leetcodeUserName": "john123",
-  "leetcodeCookies": "encrypted_leetcode_cookies"
+  "password": "123"
 }
 ```
 
