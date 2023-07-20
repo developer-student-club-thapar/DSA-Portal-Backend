@@ -1,6 +1,6 @@
 const User = require('./../models/User')
 const Cryptr = require('cryptr')
-const cryptr = new Cryptr(process.env.CRYPTR_SECRET_KEY)
+const cryptr = new Cryptr(process.env.SECRET_KEY_CRYPTR)
 
 const registerController = async(req, res)=>{
     try {
