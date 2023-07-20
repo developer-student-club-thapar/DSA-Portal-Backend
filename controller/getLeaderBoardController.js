@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { LeetCode, Credential } = require('leetcode-query');
 const Cryptr = require('cryptr');
-const cryptr = new Cryptr(process.env.SECRET_KEY);
+const cryptr = new Cryptr(process.env.SECRET_KEY_CRYPTR);
 const sheet = require('../sheet.json');
 
 const getLeaderBoardController = async (req, res) => {
