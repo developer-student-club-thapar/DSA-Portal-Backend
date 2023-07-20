@@ -9,6 +9,8 @@
 | leetcodeCookies | String  | Yes      | No     |
 | solvedProblems  | [String]| Yes      | No     |
 
+Note: solvedProblems contains the title slug of the leetcode problem that the user has solved
+
 ### Instructions to find Leetcode Session Cookies:
 
 - Open the browser and navigate to leetcode.com.
@@ -27,21 +29,11 @@ For more information on how the Leetcode scrapper works, visit this website: htt
 | Field         | Type                | Required | Unique |
 |---------------|---------------------|----------|--------|
 | titleSlug     | String              | Yes      | Yes    |
-| title         | String              | Yes      | No     |
-| solvedBy      | [mongoose.ObjectId] | No       | No     |
+| title         | String              | Yes      | Yes     |
+| solvedBy      | [mongoose.ObjectID] | Yes       | No     |
 
-Note: The solvedBy conatins array of User IDs who have solved that particular problem
+Note: The solvedBy conatins array of User ID (_id) of those who have solved that particular problem
 
-
-
-
-Sure, here's the API documentation for the provided code:
-
-
-
-Got it! Let's modify the API documentation to include the authentication feature using JWT with Bearer token.
-
-Got it! Apologies for the oversight. Let's update the API documentation to include the correct format for the `solvedBy` field, which will contain only the `_id` of the user who solved each problem.
 
 ## API Documentation
 
@@ -169,12 +161,41 @@ Authorization: Bearer your_generated_jwt_token_here
   {
     "titleSlug": "two-sum",
     "title": "Two Sum",
-    "solvedBy": ["user_id1", "user_id2", "user_id3", ...]
+    "solvedByUsers": [
+      {
+        "_id": "user_id1",
+        "name": "John Doe",
+        "leetcodeUserName": "john123"
+      },
+      {
+        "_id": "user_id2",
+        "name": "Alice Smith",
+        "leetcodeUserName": "alice_smith"
+      },
+      {
+        "_id": "user_id3",
+        "name": "Bob Johnson",
+        "leetcodeUserName": "bob_johnson"
+      },
+      // Other users who solved "Reverse Integer"...
+    ]
   },
   {
     "titleSlug": "reverse-integer",
     "title": "Reverse Integer",
-    "solvedBy": ["user_id1", "user_id2", "user_id4", ...]
+    "solvedByUsers": [
+      {
+        "_id": "user_id1",
+        "name": "John Doe",
+        "leetcodeUserName": "john123"
+      },
+      {
+        "_id": "user_id2",
+        "name": "Alice Smith",
+        "leetcodeUserName": "alice_smith"
+      },
+      // Other users who solved "Two Sum"...
+    ]
   },
   // Other problems...
 ]
