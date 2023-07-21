@@ -88,11 +88,16 @@ const getLeaderBoardController = async (req, res) => {
     }
 
     const allUsers = await User.find();
-    allUsers.forEach((user) => {
-      user.leetcodeCookies = undefined;
+    const finalUsers = allUsers.map((user) => {
+      return {
+        _id: user._id,
+        name: user.name,
+        leetcodeUserName: user.leetcodeUserName,
+        solvedProblems: user.solvedProblems,
+      };
     });
 
-    return res.status(200).json(allUsers);
+    return res.status(200).json(finalUsers);
   } catch (error) {
     console.log(error);
     return res.status(500).json({
