@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     solvedProblems: {
         type: [String],
         required: true
+    },
+    password: {
+        type: String,
+        required: true
     }
 })
 
