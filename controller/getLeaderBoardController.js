@@ -1,19 +1,21 @@
-const User = require('../models/User');
-const { LeetCode, Credential } = require('leetcode-query');
-const Cryptr = require('cryptr');
+const User = require("../models/User");
+const { LeetCode, Credential } = require("leetcode-query");
+const Cryptr = require("cryptr");
 const cryptr = new Cryptr(process.env.SECRET_KEY_CRYPTR);
-const sheet = require('../sheet.json');
+const Problem = require("../models/Problem");
 
 const getLeaderBoardController = async (req, res) => {
   try {
     const users = await User.find();
+    const problemDB = await Problem.find();
 
     const userCookies = users.map((user) => {
       return {
+        _id: user._id,
         name: user.name,
         email: user.email,
         leetcodeUserName: user.leetcodeUserName,
-        leetcodeCookies: cryptr.decrypt(user.leetcodeCookies)
+        leetcodeCookies: cryptr.decrypt(user.leetcodeCookies),
       };
     });
 
@@ -24,45 +26,82 @@ const getLeaderBoardController = async (req, res) => {
       const allProblems = await leetcode.submissions(100, 0);
 
       const solvedProblems = allProblems.filter((problem) => {
-        return problem.statusDisplay === 'Accepted';
+        return problem.statusDisplay === "Accepted";
       });
 
       const solvedProblemsArr = solvedProblems.map((problem) => {
         return {
           titleSlug: problem.titleSlug,
-          title: problem.title
+          title: problem.title,
         };
       });
 
-      const matchedProblems = solvedProblemsArr.filter((problem) => {
-        return sheet.some((row) => row.titleSlug === problem.titleSlug);
+      const filteredProblemsArr = solvedProblemsArr.filter((item, index) => {
+        const firstIndex = solvedProblemsArr.findIndex(
+          (obj) => obj.titleSlug === item.titleSlug
+        );
+        return index === firstIndex;
       });
 
-      const matchedSlugs = matchedProblems.map((problem) => problem.titleSlug);
+      filteredProblemsArr.map(async (problem) => {
+        const userProb = await Problem.findOneAndUpdate(
+          {
+            titleSlug: problem.titleSlug,
+            title: problem.title,
+          },
+          {
+            titleSlug: problem.titleSlug,
+            title: problem.title,
+          },
+          { upsert: true, new: true }
+        );
+        if (!userProb.solvedBy || !userProb.solvedBy.includes(user._id)) {
+          const prob = await Problem.findOneAndUpdate(
+            {
+              titleSlug: problem.titleSlug,
+              title: problem.title,
+            },
+            {
+              titleSlug: problem.titleSlug,
+              title: problem.title,
+              $push: { solvedBy: user._id },
+            },
+            { upsert: true, new: true }
+          );
+        }
+      });
+
+      const matchedSlugs = filteredProblemsArr.map(
+        (problem) => problem.titleSlug
+      );
 
       const uniqueSlugs = new Set(matchedSlugs);
       user.solvedProblems = Array.from(uniqueSlugs);
 
       const existingUser = await User.findOneAndUpdate(
-        { email: user.email }, 
+        { email: user.email },
         { solvedProblems: user.solvedProblems }
-    );
+      );
       if (!existingUser) {
-        throw new Error('User not found');
+        throw new Error("User not found");
       }
     }
 
     const allUsers = await User.find();
-    allUsers.forEach((user) => {
-      user.leetcodeCookies = undefined;
+    const finalUsers = allUsers.map((user) => {
+      return {
+        _id: user._id,
+        name: user.name,
+        leetcodeUserName: user.leetcodeUserName,
+        solvedProblems: user.solvedProblems,
+      };
     });
 
-    return res.status(200).json(allUsers);
-
+    return res.status(200).json(finalUsers);
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      status: 'Internal Server Error'
+      status: "Internal Server Error",
     });
   }
 };
