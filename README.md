@@ -137,6 +137,66 @@ Authorization: Bearer your_generated_jwt_token_here
 ]
 ```
 
+### View Profile of a particular user (search by Leetcode username)
+
+```
+GET /api/user/:leetcodeUsername
+```
+
+#### Authentication and Authorization
+
+This endpoint requires a valid JWT token. Pass the token as a Bearer token in the Authorization header.
+
+```
+Authorization: Bearer your_generated_jwt_token_here
+```
+
+#### Response
+
+- `200 OK`: Successfully retrieved data of the user.
+
+```json
+{
+  "name": "John Doe",
+  "leetcodeUserName": "john123",
+  "solvedProblems": ["two-sum", "reverse-integer", "palindrome-number"]
+}
+```
+
+### Upate Leetcode Cookies of a particular user
+
+#### Endpoint
+
+```
+PATCH /api/auth/update-cookies
+```
+
+#### Authentication and Authorization
+
+This endpoint requires a valid JWT token. Pass the token as a Bearer token in the Authorization header.
+
+```
+Authorization: Bearer your_generated_jwt_token_here
+```
+
+#### Request Body
+
+```json
+{
+  "leetcodeCookies": "new_leetcode_session_cookies"
+}
+```
+
+#### Response 
+
+- `200 OK`: Leetcode cookies update successful.
+
+```json
+{
+  "message": "Leetcode cookies updated successfully."
+}
+```
+
 ### View All Problems and Users Who Solved Them
 
 #### Endpoint
