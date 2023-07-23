@@ -7,7 +7,6 @@ const Problem = require("../models/Problem");
 const getLeaderBoardController = async (req, res) => {
   try {
     const users = await User.find();
-    const problemDB = await Problem.find();
 
     const userCookies = users.map((user) => {
       return {
