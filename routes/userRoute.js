@@ -1,10 +1,14 @@
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
-const getLeaderBoardController = require('../controller/getLeaderBoardController')
-const getUserDetailsController = require('../controller/getUserDetailsController')
+const getLeaderBoardController = require("../controller/getLeaderBoardController");
+const getUserDetailsController = require("../controller/getUserDetailsController");
+const getAllUsers = require("../controller/getAllUsers");
 
-router.get('/', getLeaderBoardController)
-router.get('/:leetcodeUserName', getUserDetailsController)
+// gets all users
+router.get("/users", getAllUsers);
 
-module.exports = router
+router.get("/", getLeaderBoardController);
+router.get("/:leetcodeUserName", getUserDetailsController);
+
+module.exports = router;

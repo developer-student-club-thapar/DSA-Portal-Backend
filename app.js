@@ -1,22 +1,23 @@
-require('dotenv').config()
-const express = require('express')
-const dbConfig = require('./config/dbConfig')
-const authRoute = require('./routes/authRoute')
-const userRoute = require('./routes/userRoute')
-const auth = require('./middleware/auth')
-const cookieParser = require('cookie-parser')
+require("dotenv").config();
+const express = require("express");
+const dbConfig = require("./config/dbConfig");
+const authRoute = require("./routes/authRoute");
+const userRoute = require("./routes/userRoute");
+const auth = require("./middleware/auth");
+const cookieParser = require("cookie-parser");
 
-const server = express()
+const server = express();
 
 // connect to db
-dbConfig()
+dbConfig();
 
 // middlewares
-server.use(express.json())
-server.use(cookieParser())
+server.use(express.json());
+server.use(cookieParser());
 
 // routes
-server.use('/api/auth', authRoute)
-server.use('/api/user', auth, userRoute)
+server.use("/api/auth", authRoute);
+// server.use("/api/user", auth, userRoute);
+server.use("/api/user", userRoute);
 
-module.exports = server
+module.exports = server;
