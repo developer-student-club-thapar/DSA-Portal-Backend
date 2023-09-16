@@ -17,7 +17,6 @@ server.use(cookieParser());
 
 // routes
 server.use("/api/auth", authRoute);
-// server.use("/api/user", auth, userRoute);
-server.use("/api/user", userRoute);
+server.use("/api/user", auth, userRoute);
 
 module.exports = server;
