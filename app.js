@@ -5,14 +5,20 @@ const authRoute = require("./routes/authRoute");
 const userRoute = require("./routes/userRoute");
 const auth = require("./middleware/auth");
 const cookieParser = require("cookie-parser");
+const cors = require("cors");
 
 const server = express();
 
 // connect to db
 dbConfig();
 
-// middlewares
 server.use(express.json());
+server.use(
+  cors({
+    origin: "*",
+    credentials: true,
+  })
+);
 server.use(cookieParser());
 
 // routes
