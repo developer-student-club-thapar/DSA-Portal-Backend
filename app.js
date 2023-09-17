@@ -16,7 +16,7 @@ dbConfig();
 server.use(express.json());
 server.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*",
     credentials: true,
   })
 );
