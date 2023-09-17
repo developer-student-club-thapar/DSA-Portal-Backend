@@ -12,7 +12,6 @@ const server = express();
 // connect to db
 dbConfig();
 
-// middlewares
 server.use(express.json());
 server.use(
   cors({
