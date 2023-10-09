@@ -11,6 +11,10 @@ const problemSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  difficulty: {
+    type: String,
+    required: true,
+  },
   solvedBy: { type: [mongoose.Schema.Types.ObjectId], ref: "User" },
 });
 

@@ -77,10 +77,7 @@ const getLeaderBoardController = async (req, res) => {
       const uniqueSlugs = new Set(matchedSlugs);
       user.solvedProblems = Array.from(uniqueSlugs);
 
-      const existingUser = await User.findOneAndUpdate(
-        { email: user.email },
-        { solvedProblems: user.solvedProblems }
-      );
+      const existingUser = await User.findOneAndUpdate({ email: user.email });
       if (!existingUser) {
         throw new Error("User not found");
       }
