@@ -8,54 +8,38 @@ const getLeaderBoardController = async (req, res) => {
   try {
     const users = await User.find();
 
-    const userCookies = users.map((user) => {
-      return {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        leetcodeUserName: user.leetcodeUserName,
-        leetcodeCookies: cryptr.decrypt(user.leetcodeCookies),
-      };
-    });
+    for (const user of users) {
+      try {
+        const leetcodeCookies = cryptr.decrypt(user.leetcodeCookies);
+        const credential = new Credential();
+        await credential.init(leetcodeCookies);
+        const leetcode = new LeetCode(credential);
 
-    for (const user of userCookies) {
-      const credential = new Credential();
-      await credential.init(user.leetcodeCookies);
-      const leetcode = new LeetCode(credential);
-      const allProblems = await leetcode.submissions(100, 0);
+        const allSubmissions = await leetcode.submissions();
 
-      const solvedProblems = allProblems.filter((problem) => {
-        return problem.statusDisplay === "Accepted";
-      });
+        const solvedProblems = allSubmissions.filter((submission) => {
+          return submission.status_display === "Accepted";
+        });
 
-      const solvedProblemsArr = solvedProblems.map((problem) => {
-        return {
-          titleSlug: problem.titleSlug,
-          title: problem.title,
-        };
-      });
+        const solvedProblemsArr = solvedProblems.map((submission) => {
+          return {
+            titleSlug: submission.title_slug,
+            title: submission.title,
+          };
+        });
 
-      const filteredProblemsArr = solvedProblemsArr.filter((item, index) => {
-        const firstIndex = solvedProblemsArr.findIndex(
-          (obj) => obj.titleSlug === item.titleSlug
+        // Remove duplicate problems
+        const uniqueProblems = solvedProblemsArr.filter(
+          (problem, index, self) => {
+            return (
+              index === self.findIndex((p) => p.titleSlug === problem.titleSlug)
+            );
+          }
         );
-        return index === firstIndex;
-      });
 
-      filteredProblemsArr.map(async (problem) => {
-        const userProb = await Problem.findOneAndUpdate(
-          {
-            titleSlug: problem.titleSlug,
-            title: problem.title,
-          },
-          {
-            titleSlug: problem.titleSlug,
-            title: problem.title,
-          },
-          { upsert: true, new: true }
-        );
-        if (!userProb.solvedBy || !userProb.solvedBy.includes(user._id)) {
-          const prob = await Problem.findOneAndUpdate(
+        // Update or insert the user's solved problems into the database
+        for (const problem of uniqueProblems) {
+          await Problem.findOneAndUpdate(
             {
               titleSlug: problem.titleSlug,
               title: problem.title,
@@ -63,28 +47,24 @@ const getLeaderBoardController = async (req, res) => {
             {
               titleSlug: problem.titleSlug,
               title: problem.title,
-              $push: { solvedBy: user._id },
+              $addToSet: { solvedBy: user._id },
             },
             { upsert: true, new: true }
           );
         }
-      });
 
-      const matchedSlugs = filteredProblemsArr.map(
-        (problem) => problem.titleSlug
-      );
+        user.solvedProblems = uniqueProblems.map(
+          (problem) => problem.titleSlug
+        );
 
-      const uniqueSlugs = new Set(matchedSlugs);
-      user.solvedProblems = Array.from(uniqueSlugs);
-
-      const existingUser = await User.findOneAndUpdate({ email: user.email });
-      if (!existingUser) {
-        throw new Error("User not found");
+        // Save the updated user
+        await user.save();
+      } catch (err) {
+        console.error(`Error for user ${user.email}: ${err}`);
       }
     }
 
-    const allUsers = await User.find();
-    const finalUsers = allUsers.map((user) => {
+    const finalUsers = users.map((user) => {
       return {
         _id: user._id,
         name: user.name,
@@ -95,7 +75,7 @@ const getLeaderBoardController = async (req, res) => {
 
     return res.status(200).json(finalUsers);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       status: "Internal Server Error",
     });
