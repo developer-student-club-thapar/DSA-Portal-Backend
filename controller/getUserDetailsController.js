@@ -3,7 +3,7 @@ const { LeetCode, Credential } = require("leetcode-query");
 const getUserDetailsController = async (req, res) => {
   try {
     const leetcode = new LeetCode();
-    const userDetails = await leetcode.user("mash_sharma");
+    const userDetails = await leetcode.userProfile(req.params.leetcodeUserName);
     const userAvatar = userDetails.matchedUser.profile.userAvatar;
     const rank = userDetails.matchedUser.profile.ranking;
     const totalSubmissions =

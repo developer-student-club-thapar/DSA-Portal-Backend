@@ -14,21 +14,24 @@ const getLeaderBoardController = async (req, res) => {
         const credential = new Credential();
         await credential.init(leetcodeCookies);
         const leetcode = new LeetCode(credential);
+        const allSubmissions = await leetcode.submissions({
+          limit: 2000,
+          offset: 0,
+        });
 
-        const allSubmissions = await leetcode.submissions();
+        console.log(allSubmissions);
 
         const solvedProblems = allSubmissions.filter((submission) => {
-          return submission.status_display === "Accepted";
+          return submission.statusDisplay === "Accepted";
         });
 
         const solvedProblemsArr = solvedProblems.map((submission) => {
           return {
-            titleSlug: submission.title_slug,
+            titleSlug: submission.titleSlug,
             title: submission.title,
           };
         });
 
-        // Remove duplicate problems
         const uniqueProblems = solvedProblemsArr.filter(
           (problem, index, self) => {
             return (
@@ -39,25 +42,35 @@ const getLeaderBoardController = async (req, res) => {
 
         // Update or insert the user's solved problems into the database
         for (const problem of uniqueProblems) {
-          await Problem.findOneAndUpdate(
-            {
-              titleSlug: problem.titleSlug,
-              title: problem.title,
-            },
-            {
-              titleSlug: problem.titleSlug,
-              title: problem.title,
-              $addToSet: { solvedBy: user._id },
-            },
-            { upsert: true, new: true }
-          );
+          const existingProblem = await Problem.findOne({
+            title: problem.title,
+          });
+          if (existingProblem) {
+            await Problem.findOneAndUpdate(
+              { title: problem.title },
+              { $addToSet: { solvedBy: user._id } },
+              { new: true }
+            );
+          } else {
+            await Problem.findOneAndUpdate(
+              {
+                titleSlug: problem.titleSlug,
+                title: problem.title,
+              },
+              {
+                titleSlug: problem.titleSlug,
+                title: problem.title,
+                $addToSet: { solvedBy: user._id },
+              },
+              { upsert: true, new: true }
+            );
+          }
         }
 
         user.solvedProblems = uniqueProblems.map(
           (problem) => problem.titleSlug
         );
 
-        // Save the updated user
         await user.save();
       } catch (err) {
         console.error(`Error for user ${user.email}: ${err}`);

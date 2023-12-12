@@ -31,10 +31,19 @@ const registerController = async (req, res) => {
     const credential = new Credential();
     await credential.init(leetcodeCookies);
     const leetcode = new LeetCode(credential);
-    const submissions = await leetcode.submissions(100, 0);
+    const data = await leetcode.submissions({ limit: 2000, offset: 0 });
 
-    const solvedProblems = submissions.filter((problem) => {
-      return problem.statusDisplay === "Accepted";
+    const solvedProblems = [];
+
+    console.log(data);
+
+    data.forEach((element) => {
+      if (element.statusDisplay === "Accepted") {
+        solvedProblems.push({
+          titleSlug: element.titleSlug,
+          title: element.title,
+        });
+      }
     });
 
     const user = await User.create({
